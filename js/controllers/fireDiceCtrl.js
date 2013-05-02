@@ -2,6 +2,7 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
     $scope.dataService = dataService;
     $scope.isLoggedIn = false;
     $scope.user = null;
+    $scope.games = null;
     $scope.isInGame = function () {
         if ("user" in $scope && $scope.user) {
             return "currentGame" in $scope.user;
@@ -17,7 +18,7 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
         } else if (myUser) {
             // user authenticated with Firebase
             console.log('User ID: ' + myUser.id + ', Provider: ' + myUser.provider);
-            var promise = angularFire($scope.dataService.baseURL + "users/" + myUser.id, scope, 'user', {});
+            var promise = angularFire($scope.dataService.baseURL + "users/" + myUser.id, $scope, 'user', {});
             promise.then(function () {
                 $scope.user.id = myUser.id;
                 $scope.user.displayName = myUser.displayName;
@@ -25,6 +26,7 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
                 $scope.user.lastName = myUser.last_name;
                 $scope.isLoggedIn = true;
             });
+            var promiseGame = angularFire($scope.dataService.baseURL + "games/", $scope, 'games', {});
         } else {
             // user is logged out
             $scope.user = null;
@@ -43,7 +45,7 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
         $scope.authClient.logout();
     };
 
-    $scope.create_game = function() {
+    $scope.createGame = function() {
         var pushRef = $scope.dataService.dataRef.child("games").push();
         users = {};
         users[$scope.user.id] = {num_dice: 5};
@@ -54,6 +56,10 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
                      "bid_dice_value": 0});
         $scope.user.currentGame = pushRef.name();
     };
+
+    $scope.joinGame = function(gameName) {
+        
+    }
 
     console.log("setting scope");
     window.scope = $scope;

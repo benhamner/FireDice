@@ -8,7 +8,7 @@
   <div id="loggedIn" ng-show="isLoggedIn">
     <h1>Welcome to FireDice, {{user.firstName}}</h1>
     <img ng-src="https://graph.facebook.com/{{user.id}}/picture/?type=large&return_ssl_resources=1" /><br />
-    <a class="btn clean" ng-click="create_game()" ng-show="!isInGame()">Create Game</a>
+    <a class="btn clean" ng-click="createGame()" ng-show="!isInGame()">Create Game</a>
     <div id="logout-div" class="pushv4">
       <a id="logout-button" class="btn clean" ng-click="logout()">
         <span class="icon facebook"></span>
