@@ -1,8 +1,37 @@
-var FireDiceCtrl = function($scope, $location, angularFire, dataService, authService) {
+var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
     $scope.dataService = dataService;
-    $scope.authService = authService;
-    $scope.authClient = authService.authClient;
-    authService.bindUser($scope);
+    $scope.isLoggedIn = false;
+    $scope.user = null;
+    $scope.isInGame = function () {
+        if ("user" in $scope && $scope.user) {
+            return "currentGame" in $scope.user;
+        }
+        return false;
+    }
+
+    $scope.authClient = new FirebaseAuthClient(dataService.dataRef, function(error, myUser) {
+        if (error) {
+            // an error occurred while attempting login
+            $location.path("/login");
+            console.log(error);
+        } else if (myUser) {
+            // user authenticated with Firebase
+            console.log('User ID: ' + myUser.id + ', Provider: ' + myUser.provider);
+            var promise = angularFire($scope.dataService.baseURL + "users/" + myUser.id, scope, 'user', {});
+            promise.then(function () {
+                $scope.user.id = myUser.id;
+                $scope.user.displayName = myUser.displayName;
+                $scope.user.firstName = myUser.first_name;
+                $scope.user.lastName = myUser.last_name;
+                $scope.isLoggedIn = true;
+            });
+        } else {
+            // user is logged out
+            $scope.user = null;
+            $scope.isLoggedIn = false;
+            console.log("Not logged in");
+        }
+    });
 
     $scope.login = function() {
         console.log("Calling Login Function");
@@ -24,7 +53,6 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService, authSer
                      "bid_dice_count": 0,
                      "bid_dice_value": 0});
         $scope.user.currentGame = pushRef.name();
-        $location.path("/game");
     };
 
     console.log("setting scope");
