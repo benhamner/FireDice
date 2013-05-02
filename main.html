@@ -1,0 +1,11 @@
+<div id="wrapper" class="wrapper">
+  <h1>Welcome to FireDice, {{user.firstName}}</h1>
+  <img ng-src="https://graph.facebook.com/{{user.id}}/picture/?type=large&return_ssl_resources=1" /><br />
+  <a class="btn clean" ng-click="create_game()">Create Game</a>
+  <div id="logout-div" class="pushv4">
+    <a id="logout-button" class="btn clean" ng-click="logout()">
+      <span class="icon facebook"></span>
+      <span>Log Out</span>
+    </a>
+  </div>
+</div>

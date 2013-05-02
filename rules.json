@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "users": {
+      "$userid": {
+        ".read": "$userid == auth.id",
+        ".write": "$userid == auth.id"
+      }
+    },
+    "games": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
