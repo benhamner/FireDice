@@ -15,8 +15,28 @@
         <span>Log Out</span>
       </a>
     </div>
+    <div id="game" ng-show="isInGame()">
+      <h1>{{user.firstName}}, you are now in a game!!</h1>
+      <h2 ng-show="!currentGame.started && players.length<=1">Waiting for other players to join ...</h2>
+      <a class="btn clean" ng-click="startGame()" ng-show="!currentGame.started && players.length>1">Start Game</a>
+      <a class="btn clean" ng-click="rollDice()" ng-show="currentGame.started && currentGame.round > players[playerLoc].diceRolledRound">Roll Dice</a>
+      <div id="makeMove" ng-show="playerCanMove()">
+        This div shows when the player can move
+      </div>
+    </div>
   </div>
-  <div id="game" ng-show="isInGame()">
-    <h1>Game time {{user.firstName}}!!</h1>
+  <div id="gameList">
+    <div ng-repeat="(name, game) in games">
+      <div ng-show="!game.started"><b>Waiting For Users</b></div>
+      <div ng-show="game.started"><b>In Progress</b></div>
+      <p>
+        <div ng-repeat="player in game.users">
+          <div>
+            {{player.firstName}}<br />
+            <img ng-src="https://graph.facebook.com/{{player.id}}/picture/?type=large&return_ssl_resources=1" />
+          </div>
+        </div>
+      </p>
+    </div>
   </div>
 </div>

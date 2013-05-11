@@ -3,6 +3,10 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
     $scope.isLoggedIn = false;
     $scope.user = null;
     $scope.games = null;
+    $scope.currentGame = null;
+    $scope.players = null;
+    $scope.playerLoc = null;
+
     $scope.isInGame = function () {
         if ("user" in $scope && $scope.user) {
             return "currentGame" in $scope.user;
@@ -25,8 +29,9 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
                 $scope.user.firstName = myUser.first_name;
                 $scope.user.lastName = myUser.last_name;
                 $scope.isLoggedIn = true;
+                $scope.tryReconnectToExistingGame();
             });
-            var promiseGame = angularFire($scope.dataService.baseURL + "games/", $scope, 'games', {});
+            var promiseGames = angularFire($scope.dataService.baseURL + "games/", $scope, 'games', {});
         } else {
             // user is logged out
             $scope.user = null;
@@ -47,18 +52,94 @@ var FireDiceCtrl = function($scope, $location, angularFire, dataService) {
 
     $scope.createGame = function() {
         var pushRef = $scope.dataService.dataRef.child("games").push();
-        users = {};
-        users[$scope.user.id] = {num_dice: 5};
-        pushRef.set({"users": users,
-                     "started": false,
+        pushRef.set({"started": false,
                      "ended": false,
-                     "bid_dice_count": 0,
-                     "bid_dice_value": 0});
+                     "bidDiceCount": 0,
+                     "bidDiceValue": 0,
+                     "round": 1,
+                     "playerLocThatBid": -1});
         $scope.user.currentGame = pushRef.name();
+        $scope.addPlayerToCurrentGame();
     };
 
+    $scope.tryReconnectToExistingGame = function() {
+        if ("currentGame" in $scope.user) {
+            angularFire($scope.dataService.baseURL + "games/" + $scope.user.currentGame, $scope, 'currentGame', {});
+            angularFire($scope.dataService.baseURL + "games/" + $scope.user.currentGame + "/players", $scope, 'players', []);
+        }
+    }
+
     $scope.joinGame = function(gameName) {
-        
+        $scope.user.currentGame = gameName;
+        $scope.addPlayerToCurrentGame();
+    };
+
+    $scope.addPlayerToCurrentGame = function() {
+        angularFire($scope.dataService.baseURL + "games/" + $scope.user.currentGame, $scope, 'currentGame', {});
+        var promise = angularFire($scope.dataService.baseURL + "games/" + $scope.user.currentGame + "/players", $scope, 'players', []);
+        promise.then(function() {
+            $scope.playerLoc = $scope.players.push({
+                "userId": $scope.user.id,
+                "numDice": 5,
+                "firstName": $scope.user.firstName,
+                "diceRolledRound" : 0
+            }) - 1;
+        });
+    };
+
+    $scope.startGame = function() {
+        $scope.currentGame.started = true;
+    }
+
+    $scope.rollDice = function() {
+        $scope.player.dice = _.map(_.range($scope.player.numDice), _.random(6)+1);
+        $scope.player.diceRolledRound = $scope.currentGame.round;
+    }
+
+    $scope.haveAllPlayersRolledDice = function() {
+        return _.all(_.map($scope.players, function(player) {
+            return player.diceRolledRound==$scope.currentGame.round;}));
+    }
+
+    $scope.playerCanMove = function() {
+        return ($scope.haveAllPlayersRolledDice() &&
+                $scope.playerLoc == ($scope.currentGame.playerLocThatBid + 1 % $scope.players.length));
+    }
+
+    $scope.bid = function() {
+
+    }
+
+    $scope.challenge = function() {
+        var numDiceAtValue = $scope.countDiceAtValue($scope.game.bidDiceValue);
+        if (numDiceAtValue < $scope.game.bidDiceCount) {
+            //challenge passes
+            $scope.players[$scope.game.playerLocThatBid].numDice -= 1;
+        } else {
+            //challenge fails
+            $scope.players[$scope.playerLoc].numDice -= 1;
+        }
+
+        if ($scope.numberOfPlayersLeftInGame() > 1) {
+            $scope.currentGame.round +=1;
+            $scope.currentGame.bidDiceCount = 0;
+            $scope.currentGame.bidDiceValue = 0;
+        } else {
+            $scope.currentGame.ended = true;
+        }
+    }
+
+    $scope.numberOfPlayersLeftInGame = function() {
+        return _.filter($scope.players, function(player) { return player.numDice>0; }).length;
+    }
+
+    $scope.allDiceOnTable = function() {
+        return _.flatten(_.map($scope.players, function (player) {return _.values(player.dice);}));
+    }
+
+    $scope.countDiceAtValue = function(diceValue) {
+        var dice = $scope.allDiceOnTable();
+        return _filter(dice, function(val) {return val==1 || val==diceValue;}).length;
     }
 
     console.log("setting scope");
