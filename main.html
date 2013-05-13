@@ -1,42 +1,23 @@
 <div class="wrapper">
-  <div id="login-div" class="pushv4" ng-show="!isLoggedIn">
-    <a id="login-button" class="btn clean" ng-click="login()">
-      <span class="icon facebook"></span>
-      <span>Sign in with Facebook</span>
-    </a>
-  </div>
-  <div id="loggedIn" ng-show="isLoggedIn">
+  <div id="loggedIn">
     <h1>Welcome to FireDice, {{user.firstName}}</h1>
     <img ng-src="https://graph.facebook.com/{{user.id}}/picture/?type=large&return_ssl_resources=1" /><br />
     <a class="btn clean" ng-click="createGame()" ng-show="!isInGame()">Create Game</a>
     <div id="logout-div" class="pushv4">
-      <a id="logout-button" class="btn clean" ng-click="logout()">
+      <a id="logout-button" class="btn clean" ng-click="authClient.logout()">
         <span class="icon facebook"></span>
         <span>Log Out</span>
       </a>
     </div>
-    <div id="game" ng-show="isInGame()">
-      <h1>{{user.firstName}}, you are now in a game!!</h1>
-      <h2 ng-show="!currentGame.started && players.length<=1">Waiting for other players to join ...</h2>
-      <a class="btn clean" ng-click="startGame()" ng-show="!currentGame.started && players.length>1">Start Game</a>
-      <a class="btn clean" ng-click="rollDice()" ng-show="currentGame.started && currentGame.round > players[playerLoc].diceRolledRound">Roll Dice</a>
-      <div id="makeMove" ng-show="playerCanMove()">
-        This div shows when the player can move
-      </div>
-    </div>
   </div>
   <div id="gameList">
-    <div ng-repeat="(name, game) in games">
-      <div ng-show="!game.started"><b>Waiting For Users</b></div>
+    <div ng-repeat="(name, game) in games" class="runningGame">
+      <div ng-show="!game.started"><b>Waiting For Players</b></div>
       <div ng-show="game.started"><b>In Progress</b></div>
-      <p>
-        <div ng-repeat="player in game.users">
-          <div>
-            {{player.firstName}}<br />
-            <img ng-src="https://graph.facebook.com/{{player.id}}/picture/?type=large&return_ssl_resources=1" />
-          </div>
-        </div>
-      </p>
+      <br />
+      <span ng-repeat="player in game.players">
+        <img ng-src="https://graph.facebook.com/{{player.id}}/picture/?type=small&return_ssl_resources=1" />
+      </span>
     </div>
   </div>
 </div>

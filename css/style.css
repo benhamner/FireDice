@@ -38,6 +38,11 @@ img{
   height: auto;
 }
 
+.runningGame {
+  border: 2px solid;
+  border-color: black;
+}
+
 /* Grid
 ============================================================ */
 .wrapper{

@@ -1,0 +1,17 @@
+<div class="wrapper">
+  <div id="game">
+    <h1>{{user.firstName}}, you are now in a game!!</h1>
+    <h2 ng-show="!currentGame.started && players.length<=1">Waiting for other players to join ...</h2>
+    <a class="btn clean" ng-click="startGame()" ng-show="!currentGame.started && players.length>1">Start Game</a>
+    <a class="btn clean" ng-click="rollDice()" ng-show="currentGame.started && currentGame.round > players[playerLoc].diceRolledRound">Roll Dice</a>
+    <div id="makeMove" ng-show="playerCanMove()">
+    This div shows when the player can move
+    </div>
+  </div>
+  <div id="logout-div" class="pushv4">
+    <a id="logout-button" class="btn clean" ng-click="authClient.logout()">
+      <span class="icon facebook"></span>
+      <span>Log Out</span>
+    </a>
+  </div>
+</div>
